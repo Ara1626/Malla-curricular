@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Malla Biología PUCV Completa</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f9f9f9; }
+    h1 { text-align: center; }
+    .semester { background: white; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    .semester h2 { margin-top: 0; }
+    .course { border: 1px solid #ccc; padding: 10px; border-radius: 5px; margin: 5px 0; cursor: pointer; }
+    .pending { background-color: #fff; }
+    .in-progress { background-color: #ffe699; }
+    .approved { background-color: #c6efce; }
+    .progress-bar-container { background: #e0e0e0; border-radius: 10px; height: 20px; margin: 20px 0; }
+    .progress-bar { background: #4caf50; height: 100%; border-radius: 10px; width: 0; transition: width 0.3s ease; }
+    .semester-info { font-size: 0.9em; color: #555; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Malla Licenciatura en Biología - PUCV</h1>
+  <div class="progress-bar-container">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+  <div id="semesters"></div>
+  <script>
+    const semestersData = [
+      { title: "Semestre I", hours: "35 H", credits: "20 C", courses: ["Matemáticas I", "Química General", "Biología General", "Física I", "Taller de Lectura y Escritura"] },
+      { title: "Semestre II", hours: "36 H", credits: "20 C", courses: ["Matemáticas II", "Química Orgánica", "Zoología General", "Física II", "Comunicación Científica"] },
+      { title: "Semestre III", hours: "32 H", credits: "18 C", courses: ["Estadística", "Botánica General", "Genética", "Bioquímica I", "Inglés I"] },
+      { title: "Semestre IV", hours: "38 H", credits: "18 C", courses: ["Ecología General", "Microbiología", "Bioquímica II", "Fisiología Animal", "Inglés II"] },
+      { title: "Semestre V", hours: "38 H", credits: "20 C", courses: ["Fisiología Vegetal", "Zoología de Vertebrados", "Biología Celular", "Metodología de la Investigación", "Electivo"] },
+      { title: "Semestre VI", hours: "36 H", credits: "19 C", courses: ["Botánica Sistemática", "Zoología de Invertebrados", "Ecología de Poblaciones", "Evolución", "Electivo"] },
+      { title: "Semestre VII", hours: "38 H", credits: "20 C", courses: ["Ecología de Comunidades", "Biología Molecular", "Conservación de la Biodiversidad", "Trabajo de Investigación I", "Electivo"] },
+      { title: "Semestre VIII", hours: "32 H", credits: "18 C", courses: ["Trabajo de Investigación II", "Seminario de Licenciatura", "Electivo 1", "Electivo 2"] }
+    ];
+
+    let statusData = JSON.parse(localStorage.getItem("mallaStatus")) || {};
+
+    function saveStatus() {
+      localStorage.setItem("mallaStatus", JSON.stringify(statusData));
+    }
+
+    function updateProgressBar() {
+      const totalCourses = semestersData.reduce((sum, sem) => sum + sem.courses.length, 0);
+      const approvedCourses = Object.values(statusData).filter(status => status === "approved").length;
+      const progressPercent = (approvedCourses / totalCourses) * 100;
+      document.getElementById("progressBar").style.width = progressPercent + "%";
+    }
+
+    function toggleStatus(course) {
+      if (!statusData[course]) statusData[course] = "pending";
+      if (statusData[course] === "pending") statusData[course] = "in-progress";
+      else if (statusData[course] === "in-progress") statusData[course] = "approved";
+      else statusData[course] = "pending";
+      saveStatus();
+      renderSemesters();
+    }
+
+    function renderSemesters() {
+      const container = document.getElementById("semesters");
+      container.innerHTML = "";
+      semestersData.forEach(semester => {
+        const semesterDiv = document.createElement("div");
+        semesterDiv.className = "semester";
+
+        const semesterTitle = document.createElement("h2");
+        semesterTitle.textContent = semester.title;
+
+        const semesterInfo = document.createElement("div");
+        semesterInfo.className = "semester-info";
+        semesterInfo.textContent = `Horas: ${semester.hours} | Créditos: ${semester.credits}`;
+
+        semesterDiv.appendChild(semesterTitle);
+        semesterDiv.appendChild(semesterInfo);
+
+        semester.courses.forEach(course => {
+          const courseDiv = document.createElement("div");
+          courseDiv.textContent = course;
+          courseDiv.className = `course ${statusData[course] || "pending"}`;
+          courseDiv.onclick = () => toggleStatus(course);
+          semesterDiv.appendChild(courseDiv);
+        });
+
+        container.appendChild(semesterDiv);
+      });
+      updateProgressBar();
+    }
+
+    renderSemesters();
+  </script>
+</body>
+</html>
 
